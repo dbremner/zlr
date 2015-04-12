@@ -11,6 +11,29 @@ namespace ZLR.VM.Debugging
         Running,
     }
 
+    public sealed class EnterFunctionEventArgs : EventArgs
+    {
+        public short PackedAddress { get; private set; }
+        public short[] Args { get; private set; }
+        public int ResultStorage { get; private set; }
+        public int ReturnPC { get; private set; }
+        public int CallDepth { get; private set; }
+
+        public EnterFunctionEventArgs(short packedAddress, short[] args, int resultStorage, int returnPC, int callDepth)
+        {
+            this.PackedAddress = packedAddress;
+            this.Args = args;
+            this.ResultStorage = resultStorage;
+            this.ReturnPC = returnPC;
+            this.CallDepth = callDepth;
+        }
+    }
+
+    public interface IDebuggerEvents
+    {
+        event EventHandler<EnterFunctionEventArgs> EnteringFunction;
+    }
+
     public interface IDebugger
     {
         DebuggerState State { get; }
@@ -43,6 +66,8 @@ namespace ZLR.VM.Debugging
 
         int UnpackAddress(short packedAddress, bool forString);
         short PackAddress(int address, bool forString);
+
+        IDebuggerEvents Events { get; }
     }
 
     public interface ICallFrame
@@ -59,7 +84,7 @@ namespace ZLR.VM
 {
     using Debugging;
 
-    partial class ZMachine
+    partial class ZMachine : IDebuggerEvents
     {
         private int stepping = -1;
         private Dictionary<int, bool> breakpoints = new Dictionary<int, bool>();
@@ -319,7 +344,26 @@ namespace ZLR.VM
                 }
             }
 
+            public IDebuggerEvents Events
+            {
+                get { return zm; }
+            }
+
             #endregion
+        }
+
+        #region IDebuggerEvents Members
+
+        public event EventHandler<EnterFunctionEventArgs> EnteringFunction;
+
+        #endregion
+
+        private void HandleEnterFunction(short packedAddress, short[] args, int resultStorage, int returnPC)
+        {
+            var handler = this.EnteringFunction;
+            if (handler != null)
+                handler(this, new EnterFunctionEventArgs(
+                    packedAddress, args, resultStorage, returnPC, callStack.Count));
         }
     }
 }

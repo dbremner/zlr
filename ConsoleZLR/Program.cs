@@ -173,6 +173,38 @@ namespace ZLR.Interfaces.SystemConsole
             Console.WriteLine("ConsoleZLR Debugger");
             dbg.Restart();
 
+            bool tracingCalls = false;
+            EventHandler<EnterFunctionEventArgs> traceCallsEventHandler = (sender, e) =>
+            {
+                Console.Write("[ ");
+
+                for (int i = 0; i < e.CallDepth; i++)
+                    Console.Write(". ");
+
+                if (zm.DebugInfo != null &&
+                    (rtn = zm.DebugInfo.FindRoutine(dbg.UnpackAddress(e.PackedAddress, false))) != null)
+                {
+                    Console.Write(rtn.Name);
+                }
+                else
+                {
+                    Console.Write("${0:x4}", e.PackedAddress);
+                }
+
+                Console.Write('(');
+                if (e.Args != null)
+                {
+                    for (int i = 0; i < e.Args.Length; i++)
+                    {
+                        if (i > 0)
+                            Console.Write(", ");
+
+                        Console.Write(e.Args[i]);
+                    }
+                }
+                Console.Write(") ]\n");
+            };
+
             string lastCmd = null;
             char[] delim = new char[] { ' ' };
             while (true)
@@ -351,6 +383,20 @@ namespace ZLR.Interfaces.SystemConsole
                         }
                         break;
 
+                    case "tc":
+                    case "tracecalls":
+                        if (tracingCalls)
+                        {
+                            dbg.Events.EnteringFunction -= traceCallsEventHandler;
+                            Console.WriteLine("Tracing calls disabled.");
+                        }
+                        else
+                        {
+                            dbg.Events.EnteringFunction += traceCallsEventHandler;
+                            Console.WriteLine("Tracing calls enabled.");
+                        }
+                        break;
+
                     case "bt":
                     case "backtrace":
                         frames = dbg.GetCallFrames();
@@ -459,6 +505,11 @@ namespace ZLR.Interfaces.SystemConsole
                         }
                         break;
 
+                    case "g":
+                    case "globals":
+                        Console.WriteLine("Not implemented.");
+                        break;
+
                     case "q":
                     case "quit":
                         Console.WriteLine("Goodbye.");
@@ -469,8 +520,9 @@ namespace ZLR.Interfaces.SystemConsole
                         
                         Console.WriteLine("Commands:");
                         Console.WriteLine("reset, (s)tep, (o)ver, stepline (sl), overline (ol), up, (r)un,");
-                        Console.WriteLine("(b)reak, (c)lear, breakpoints (bps)");
-                        Console.WriteLine("backtrace (bt), (l)ocals, (g)lobals, (q)uit");
+                        Console.WriteLine("(b)reak, (c)lear, breakpoints (bps), tracecalls (tc)");
+                        Console.WriteLine("backtrace (bt), (l)ocals, (g)lobals");
+                        Console.WriteLine("(q)uit");
                         break;
                 }
             }
@@ -597,7 +649,8 @@ namespace ZLR.Interfaces.SystemConsole
                 {
                     lines = File.ReadAllLines(file);
                     cache.Add(li.File, lines);
-                    cache.Add(file, lines);
+                    if (file != li.File)
+                        cache.Add(file, lines);
                 }
             }
 
