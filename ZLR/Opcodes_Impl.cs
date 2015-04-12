@@ -19,6 +19,11 @@ namespace ZLR.VM
 
         private void EnterFunctionImpl(short packedAddress, short[] args, int resultStorage, int returnPC)
         {
+            if (debugging)
+            {
+                HandleEnterFunction(packedAddress, args, resultStorage, returnPC);
+            }
+
             if (packedAddress == 0)
             {
                 if (resultStorage != -1)
