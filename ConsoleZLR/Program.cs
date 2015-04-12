@@ -393,7 +393,7 @@ namespace ZLR.Interfaces.SystemConsole
                             else if (zm.DebugInfo.Globals.Contains((byte)cf.ResultStorage))
                             {
                                 Console.WriteLine("storing result to global {0} ({1})", cf.ResultStorage,
-                                    zm.DebugInfo.Globals[(byte)cf.ResultStorage]);
+                                    zm.DebugInfo.Globals[(byte)(cf.ResultStorage - 16)]);
                             }
                             else
                             {

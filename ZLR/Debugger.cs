@@ -258,8 +258,8 @@ namespace ZLR.VM
                             return "local_" + varnum + "(" + rtn.Locals[varnum - 1] + ")";
                         else if (varnum < 16)
                             return "local_" + varnum;
-                        else if (zm.debugFile != null && zm.debugFile.Globals.Contains(varnum))
-                            return "global_" + varnum + "(" + zm.debugFile.Globals[varnum] + ")";
+                        else if (zm.debugFile != null && zm.debugFile.Globals.Contains((byte)(varnum - 16)))
+                            return "global_" + varnum + "(" + zm.debugFile.Globals[(byte)(varnum - 16)] + ")";
                         else
                             return "global_" + varnum;
                     });
