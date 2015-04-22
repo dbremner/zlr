@@ -471,7 +471,7 @@ namespace ZLR.Interfaces.SystemConsole
                                     cf.Locals.Length,
                                     cf.Locals.Length == 1 ? "" : "s");
 
-                                rtn = zm.DebugInfo.FindRoutine(dbg.CurrentPC);
+                                rtn = zm.DebugInfo != null ? zm.DebugInfo.FindRoutine(dbg.CurrentPC) : null;
                                 for (int i = 0; i < cf.Locals.Length; i++)
                                 {
                                     Console.Write("    ");
@@ -563,7 +563,7 @@ namespace ZLR.Interfaces.SystemConsole
 
                 if (zm.DebugInfo != null)
                 {
-                    int idx = spec.IndexOf(':');
+                    int idx = spec.LastIndexOf(':');
                     if (idx >= 0)
                     {
                         try
@@ -580,7 +580,7 @@ namespace ZLR.Interfaces.SystemConsole
 
                     RoutineInfo rtn;
 
-                    idx = spec.IndexOf('+');
+                    idx = spec.LastIndexOf('+');
                     if (idx >= 0)
                     {
                         try
