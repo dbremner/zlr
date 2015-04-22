@@ -37,7 +37,8 @@ namespace TestSuite
                 Console.WriteLine();
                 Console.WriteLine("1. List all tests");
                 Console.WriteLine("2. Run all tests");
-                Console.WriteLine("3. Record expected outcome");
+                Console.WriteLine("3. Run one test");
+                Console.WriteLine("4. Record expected outcome");
                 Console.WriteLine();
                 Console.WriteLine("0. Quit");
                 Console.WriteLine();
@@ -58,6 +59,10 @@ namespace TestSuite
                         break;
 
                     case '3':
+                        RunOneTest();
+                        break;
+
+                    case '4':
                         RecordExpectedOutcome();
                         break;
 
@@ -134,6 +139,23 @@ namespace TestSuite
             return output;
         }
 
+        private static void RunOneTest()
+        {
+            TestCase selected = PromptForTestCase();
+
+            if (selected != null)
+            {
+                try
+                {
+                    RunOneTest(selected);
+                }
+                finally
+                {
+                    selected.CleanUp();
+                }
+            }
+        }
+
         private static void RunAllTests()
         {
             List<string> names = new List<string>(testCases.Keys);
@@ -153,42 +175,8 @@ namespace TestSuite
 
                     Console.Write("{0} - ", name);
 
-                    if (!File.Exists(test.InputFile) || !File.Exists(test.OutputFile))
-                    {
-                        Console.WriteLine("skipping (expected outcome not recorded).");
-                    }
-                    else
-                    {
-                        try
-                        {
-                            using (Stream zcode = test.GetZCode())
-                            {
-                                ReplayIO io = new ReplayIO(test.InputFile);
-                                ZMachine zm = new ZMachine(zcode, io);
-
-                                zm.PredictableRandom = true;
-                                zm.ReadingCommandsFromFile = true;
-
-                                string output = RunAndCollectOutput(zm, io);
-                                string expectedOutput = File.ReadAllText(test.OutputFile);
-
-                                if (OutputDiffers(expectedOutput, output))
-                                {
-                                    Console.WriteLine("failed!");
-                                    failures++;
-                                    File.WriteAllText(test.FailureFile, output);
-                                }
-                                else
-                                {
-                                    Console.WriteLine("passed.");
-                                }
-                            }
-                        }
-                        finally
-                        {
-                            test.CleanUp();
-                        }
-                    }
+                    if (RunOneTest(test) == false)
+                        failures++;
                 }
 
                 if (failures > 0)
@@ -197,6 +185,48 @@ namespace TestSuite
                     Console.WriteLine("{0} test{1} failed. The actual output is saved with the suffix \".failed-output.txt\".",
                         failures,
                         failures == 1 ? "" : "s");
+                }
+            }
+        }
+
+        private static bool? RunOneTest(TestCase test)
+        {
+            if (!File.Exists(test.InputFile) || !File.Exists(test.OutputFile))
+            {
+                Console.WriteLine("skipping (expected outcome not recorded).");
+                return null;
+            }
+            else
+            {
+                try
+                {
+                    using (Stream zcode = test.GetZCode())
+                    {
+                        ReplayIO io = new ReplayIO(test.InputFile);
+                        ZMachine zm = new ZMachine(zcode, io);
+
+                        zm.PredictableRandom = true;
+                        zm.ReadingCommandsFromFile = true;
+
+                        string output = RunAndCollectOutput(zm, io);
+                        string expectedOutput = File.ReadAllText(test.OutputFile);
+
+                        if (OutputDiffers(expectedOutput, output))
+                        {
+                            Console.WriteLine("failed!");
+                            File.WriteAllText(test.FailureFile, output);
+                            return false;
+                        }
+                        else
+                        {
+                            Console.WriteLine("passed.");
+                            return true;
+                        }
+                    }
+                }
+                finally
+                {
+                    test.CleanUp();
                 }
             }
         }
