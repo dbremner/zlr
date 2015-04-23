@@ -4,7 +4,7 @@ namespace ZLR.VM
 {
     public partial class ZMachine
     {
-        private short GetPropAddr(ushort obj, short prop)
+        private ushort GetPropAddr(ushort obj, short prop)
         {
             if (obj == 0)
                 return 0;
@@ -24,7 +24,7 @@ namespace ZLR.VM
                     int len = (b >> 5) + 1;
 
                     if (num == prop)
-                        return (short)addr;
+                        return (ushort)addr;
                     else if (num < prop)
                         break;
 
@@ -62,7 +62,7 @@ namespace ZLR.VM
                     }
 
                     if (num == prop)
-                        return (short)addr;
+                        return (ushort)addr;
                     else if (num < prop)
                         break;
 
@@ -147,9 +147,22 @@ namespace ZLR.VM
             int addr = GetPropAddr(obj, prop);
 
             if (addr == 0)
+            {
+                // not present, use default value
                 return GetWord(objectTable + 2 * (prop - 1));
-            else
-                return GetWord(addr);
+            }
+
+            switch (GetPropLength((ushort)addr))
+            {
+                case 1:
+                    return GetByte(addr);
+
+                case 2:
+                    return GetWord(addr);
+
+                default:
+                    throw new InvalidOperationException("Illegal get_prop on >2 byte property");
+            }
         }
 
         private void SetPropValue(ushort obj, short prop, short value)
