@@ -261,6 +261,7 @@ namespace ZLR.VM
             LoadOperand(il, 0);
             LoadOperand(il, 1);
             il.Emit(OpCodes.Call, getPropAddrMI);
+            il.Emit(OpCodes.Conv_I2);
             StoreResult(il);
         }
 
