@@ -387,11 +387,13 @@ namespace ZLR.Interfaces.SystemConsole
                     case "tracecalls":
                         if (tracingCalls)
                         {
+                            tracingCalls = false;
                             dbg.Events.EnteringFunction -= traceCallsEventHandler;
                             Console.WriteLine("Tracing calls disabled.");
                         }
                         else
                         {
+                            tracingCalls = true;
                             dbg.Events.EnteringFunction += traceCallsEventHandler;
                             Console.WriteLine("Tracing calls enabled.");
                         }
