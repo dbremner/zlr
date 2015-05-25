@@ -87,11 +87,11 @@ namespace ZLR.Interfaces.SystemConsole
                 switch (displayType)
                 {
                     case DisplayType.Dumb:
-                        io = new DumbIO();
+                        io = new DumbIO(false, commandFile);
                         break;
 
                     case DisplayType.DumbBottomWinOnly:
-                        io = new DumbIO(true);
+                        io = new DumbIO(true, commandFile);
                         break;
 
                     case DisplayType.FullScreen:
