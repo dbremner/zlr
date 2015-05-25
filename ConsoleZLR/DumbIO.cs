@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using ZLR.VM;
 
@@ -8,16 +9,13 @@ namespace ZLR.Interfaces.SystemConsole
     class DumbIO : IZMachineIO
     {
         private readonly bool bottomWinOnly;
+        private string suppliedCommandFile;
         private short curWin = 0;
 
-        public DumbIO()
-            : this(false)
-        {
-        }
-
-        public DumbIO(bool bottomWinOnly)
+        public DumbIO(bool bottomWinOnly, string commandFile)
         {
             this.bottomWinOnly = bottomWinOnly;
+            this.suppliedCommandFile = commandFile;
         }
 
         public string ReadLine(string initial, int time, TimedInputCallback callback,
@@ -104,8 +102,54 @@ namespace ZLR.Interfaces.SystemConsole
 
         public System.IO.Stream OpenCommandFile(bool writing)
         {
-            // not implemented
-            return null;
+            string filename;
+            if (suppliedCommandFile != null)
+            {
+                filename = suppliedCommandFile;
+                suppliedCommandFile = null;
+            }
+            else
+            {
+                do
+                {
+                    Console.Write("Enter the name of a command file to {0} (blank to cancel): ",
+                        writing ? "record" : "play back");
+                    filename = Console.ReadLine();
+                    if (filename == "")
+                        return null;
+
+                    if (writing)
+                    {
+                        // if the file exists, prompt to overwrite it
+                        if (File.Exists(filename))
+                        {
+                            string yorn;
+                            do
+                            {
+                                Console.Write("\"{0}\" exists. Are you sure (y/n)? ", filename);
+                                yorn = Console.ReadLine().ToLower().Trim();
+                            }
+                            while (yorn.Length == 0);
+
+                            if (yorn[0] == 'y')
+                                break;
+                        }
+                        else
+                            break;
+                    }
+                    else
+                    {
+                        // the file must already exist
+                        if (File.Exists(filename))
+                            break;
+                    }
+                }
+                while (true);
+            }
+
+            return new FileStream(filename,
+                    writing ? FileMode.Create : FileMode.Open,
+                    writing ? FileAccess.Write : FileAccess.Read);
         }
 
         public void SetTextStyle(TextStyle style)
