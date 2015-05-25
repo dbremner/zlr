@@ -267,7 +267,10 @@ namespace ZLR.Interfaces.SystemConsole
             }
 
             if (terminator == 13)
+            {
+                CheckScroll(true);
                 Console.WriteLine();
+            }
 
             string result = sb.ToString();
 
@@ -375,6 +378,7 @@ namespace ZLR.Interfaces.SystemConsole
         {
             if (upper || !buffering)
             {
+                CheckScroll(ch == '\n');
                 Console.Write(ch);
                 CheckMore();
             }
@@ -388,6 +392,7 @@ namespace ZLR.Interfaces.SystemConsole
             {
                 foreach (char ch in str)
                 {
+                    CheckScroll(ch == '\n');
                     Console.Write(ch);
                     CheckMore();
                 }
@@ -405,11 +410,13 @@ namespace ZLR.Interfaces.SystemConsole
             {
                 if (Console.CursorLeft + bufferLength >= Console.WindowWidth)
                 {
+                    CheckScroll(true);
                     Console.Write('\n');
                     CheckMore();
                 }
 
                 FlushBuffer();
+                CheckScroll(ch == '\n');
                 Console.Write(ch);
                 CheckMore();
                 return;
@@ -1118,6 +1125,7 @@ namespace ZLR.Interfaces.SystemConsole
             {
                 if ((item & STYLE_FLAG) == 0)
                 {
+                    CheckScroll(item == '\n');
                     Console.Write((char)item);
                     CheckMore();
                 }
@@ -1130,6 +1138,20 @@ namespace ZLR.Interfaces.SystemConsole
 
             buffer.RemoveRange(0, buffer.Count);
             bufferLength = 0;
+        }
+
+        private void CheckScroll(bool force = false)
+        {
+            if (split > 0)
+            {
+                var atRightEdge = Console.CursorLeft == Console.BufferWidth - 1;
+                var onLastLine = Console.CursorTop == Console.BufferHeight - 1;
+
+                if (onLastLine && (atRightEdge || force))
+                {
+                    Console.MoveBufferArea(0, 0, Console.BufferWidth, split, 0, 1);
+                }
+            }
         }
 
         private void CheckMore()
