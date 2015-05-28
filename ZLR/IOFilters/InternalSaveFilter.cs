@@ -9,6 +9,11 @@ namespace ZLR.VM.IOFilters
     {
         private MemoryStream saveData;
 
+        public InternalSaveFilter(IZMachineIO next)
+            : base(next)
+        {
+        }
+
         public override System.IO.Stream OpenSaveFile(int size)
         {
             saveData = new MemoryStream(size);

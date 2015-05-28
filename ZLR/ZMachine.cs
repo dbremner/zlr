@@ -210,6 +210,11 @@ namespace ZLR.VM
             get { return debugFile; }
         }
 
+        public IZMachineIO IO
+        {
+            get { return io; }
+        }
+
         private CallFrame TopFrame
         {
             get { return topFrame; }

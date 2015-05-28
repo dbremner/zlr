@@ -6,6 +6,11 @@ namespace ZLR.VM.IOFilters
 {
     public sealed class NoSoundFilter : FilterBase
     {
+        public NoSoundFilter(IZMachineIO next)
+            : base(next)
+        {
+        }
+
         public override void PlayBeep(bool highPitch)
         {
             // nada
