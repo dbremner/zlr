@@ -6,6 +6,11 @@ namespace ZLR.VM.IOFilters
 {
     public sealed class NoFilesFilter : FilterBase
     {
+        public NoFilesFilter(IZMachineIO next)
+            : base(next)
+        {
+        }
+
         public override System.IO.Stream OpenAuxiliaryFile(string name, int size, bool writing)
         {
             return null;

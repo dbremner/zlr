@@ -59,7 +59,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConsoleIO.cs" />
-    <Compile Include="FilterIO.cs" />
     <Compile Include="DumbIO.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -77,6 +76,10 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ZLR.Debugging\ZLR.Debugging.csproj">
+      <Project>{601756b2-3e74-402a-8622-772195fb7946}</Project>
+      <Name>ZLR.Debugging</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ZLR\ZLR.VM.csproj">
       <Project>{75CC483D-D28E-49EE-AB8F-F77CC3F58BFA}</Project>
       <Name>ZLR.VM</Name>
