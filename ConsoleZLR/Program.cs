@@ -24,6 +24,7 @@ namespace ZLR.Interfaces.SystemConsole
                 string fileName = null, commandFile = null;
                 DisplayType displayType = DisplayType.FullScreen;
                 bool debugger = false, predictable = false;
+                bool wait = true;
 
                 if (args.Length >= 1 && args[0].Length > 0)
                 {
@@ -60,6 +61,10 @@ namespace ZLR.Interfaces.SystemConsole
                             case "-predictable":
                                 n++;
                                 predictable = true;
+                                break;
+                            case "-nowait":
+                                n++;
+                                wait = false;
                                 break;
                             default:
                                 parsing = false;
@@ -139,8 +144,11 @@ namespace ZLR.Interfaces.SystemConsole
                     Console.WriteLine(e.ToString());
                 }
 #endif
-                    Console.WriteLine("Press any key to exit...");
-                    Console.ReadKey(true);
+                    if (wait)
+                    {
+                        Console.WriteLine("Press any key to exit...");
+                        Console.ReadKey(true);
+                    }
                 }
                 return 0;
             }
@@ -153,7 +161,7 @@ namespace ZLR.Interfaces.SystemConsole
         private static int Usage()
         {
             string exe = Path.GetFileName(Assembly.GetExecutingAssembly().Location);
-            Console.WriteLine("Usage: {0} [-commands <commandfile.txt>] [-dumb | -dumb2] [-debug] [-predictable] <game_file.z5/z8> [<debug_file.dbg>]", exe);
+            Console.WriteLine("Usage: {0} [-commands <commandfile.txt>] [-dumb | -dumb2] [-debug] [-predictable] [-nowait] <game_file.z5/z8> [<debug_file.dbg>]", exe);
             return 1;
         }
 
