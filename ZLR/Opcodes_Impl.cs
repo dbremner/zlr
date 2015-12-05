@@ -549,6 +549,42 @@ namespace ZLR.VM
                 io.SelectWindow(0);
             }
         }
+
+        private short PullFromUserStack(ushort stack)
+        {
+            var freeSlots = GetWord(stack);
+            freeSlots++;
+            var result = GetWord(stack + 2 * freeSlots);
+            SetWord(stack, freeSlots);
+            return result;
+        }
+
+        private bool PushOntoUserStack(short value, ushort stack)
+        {
+            var freeSlots = GetWord(stack);
+            if (freeSlots > 0)
+            {
+                SetWord(stack + 2 * freeSlots, value);
+                SetWord(stack, (short)(freeSlots - 1));
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private void PopUserStack(short count, ushort stack)
+        {
+            var freeSlots = GetWord(stack);
+            SetWord(stack, (short)(freeSlots + count));
+        }
+
+        private void PopStack(short count)
+        {
+            for (int i = 0; i < count; i++)
+                stack.Pop();
+        }
 #pragma warning restore 0169
     }
 }

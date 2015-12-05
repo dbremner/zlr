@@ -159,17 +159,40 @@ namespace ZLR.VM
             PushOntoStack(il);
         }
 
-        [Opcode(OpCount.Var, 233, IndirectVar = true)]
+        [Opcode(OpCount.Var, 233, IndirectVar = true, MaxVersion = 5)]
+        [Opcode(OpCount.Var, 233, true, MinVersion = 6, MaxVersion = 6)]
         private void op_pull(ILGenerator il)
         {
-            MethodInfo impl = typeof(ZMachine).GetMethod("StoreVariableImpl", BindingFlags.NonPublic | BindingFlags.Instance);
+            if (zm.ZVersion == 6)
+            {
+                if (argc == 0)
+                {
+                    PopFromStack(il);
+                }
+                else
+                {
+                    MethodInfo impl = typeof(ZMachine).GetMethod("PullFromUserStack", BindingFlags.NonPublic | BindingFlags.Instance);
 
-            System.Diagnostics.Debug.Assert(argc == 1);
+                    System.Diagnostics.Debug.Assert(argc == 1);
 
-            il.Emit(OpCodes.Ldarg_0);
-            LoadOperand(il, 0);
-            PopFromStack(il);
-            il.Emit(OpCodes.Call, impl);
+                    il.Emit(OpCodes.Ldarg_0);
+                    LoadOperand(il, 0);
+                    il.Emit(OpCodes.Call, impl);
+                }
+
+                StoreResult(il);
+            }
+            else
+            {
+                MethodInfo impl = typeof(ZMachine).GetMethod("StoreVariableImpl", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                System.Diagnostics.Debug.Assert(argc == 1);
+
+                il.Emit(OpCodes.Ldarg_0);
+                LoadOperand(il, 0);
+                PopFromStack(il);
+                il.Emit(OpCodes.Call, impl);
+            }
         }
 
         [Opcode(OpCount.Var, 234, MinVersion = 3)]
