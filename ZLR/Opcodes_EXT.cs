@@ -239,6 +239,40 @@ namespace ZLR.VM
             il.Emit(OpCodes.Call, checkUnicodeMI);
             StoreResult(il);
         }
+
+        [Opcode(OpCount.Ext, 21, MinVersion = 6, MaxVersion = 6)]
+        private void op_pop_stack(ILGenerator il)
+        {
+            if (argc == 1)
+            {
+                MethodInfo impl = typeof(ZMachine).GetMethod("PopStack", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                il.Emit(OpCodes.Ldarg_0);
+                LoadOperand(il, 0);
+                il.Emit(OpCodes.Call, impl);
+            }
+            else
+            {
+                MethodInfo impl = typeof(ZMachine).GetMethod("PopUserStack", BindingFlags.NonPublic | BindingFlags.Instance);
+
+                il.Emit(OpCodes.Ldarg_0);
+                LoadOperand(il, 0);
+                LoadOperand(il, 1);
+                il.Emit(OpCodes.Call, impl);
+            }
+        }
+
+        [Opcode(OpCount.Ext, 24, false, true, false, MinVersion = 6, MaxVersion = 6)]
+        private void op_push_stack(ILGenerator il)
+        {
+            MethodInfo impl = typeof(ZMachine).GetMethod("PushOntoUserStack", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            il.Emit(OpCodes.Ldarg_0);
+            LoadOperand(il, 0);
+            LoadOperand(il, 1);
+            il.Emit(OpCodes.Call, impl);
+            Branch(il, OpCodes.Brtrue, OpCodes.Brfalse);
+        }
 #pragma warning restore 0169
     }
 }
